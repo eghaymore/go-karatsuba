@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+//	"math/big"
 )
 
 func main() {
@@ -15,44 +16,69 @@ func main() {
 	}
 	var input1 = os.Args[1]
 	var input2 = os.Args[2]
-	// Parse input
-	len_input1 := len(input1)
-	len_input2 := len(input2)
-	width := max(len_input1, len_input2)
+	result := karatsuba(input1, input2)
+	fmt.Println(result)
+}
 
+// TODO: This works but encounters int overflow with operands longer than 10 digits (base 10)
+// Maybe try to make it work using big int?
+func karatsuba(i1 string, i2 string) int {
+	// Parse input
+	len_i1 := len(i1)
+	len_i2 := len(i2)
+	width := max(len_i1, len_i2)
+	fmt.Println("width of %d found!", width) // Debug
+	
 	if (width % 2 != 0) {
 		fmt.Println("Non-even input length!") // Debug
 		width += 1
-		input1 = fmt.Sprintf("%0*s", width, input1)
-		input2 = fmt.Sprintf("%0*s", width, input2)
+		i1 = fmt.Sprintf("%0*s", width, i1)
+		i2 = fmt.Sprintf("%0*s", width, i2)
 		
 	}
-	if (len_input1 != len_input2) {
+	if (len_i1 != len_i2) {
 		fmt.Println("Mismatched inputs!") // Debug
-		input1 = fmt.Sprintf("%0*s", width, input1)
-		input2 = fmt.Sprintf("%0*s", width, input2)
+		i1 = fmt.Sprintf("%0*s", width, i1)
+		i2 = fmt.Sprintf("%0*s", width, i2)
 	}
-	fmt.Println(fmt.Sprintf("Performing multiplication on %s and %s", input1, input2))
-	
+	fmt.Println(fmt.Sprintf("Performing multiplication on %s and %s", i1, i2))
+	if (width < 3) { // Base Case
+		_i1, err1 := strconv.Atoi(i1)
+		_i2, err2 := strconv.Atoi(i2)
+		if (err1 != nil || err2 != nil) {
+			fmt.Println("Error converting component(s) to integer values")
+			return 0
+		}
+		return _i1 * _i2
+	}
+
 	// Define components
 	idx := width/2
-	a, erra := strconv.Atoi(input1[0:idx])
-	b, errb := strconv.Atoi(input1[idx:])
-	c, errc := strconv.Atoi(input2[0:idx])
-	d, errd := strconv.Atoi(input2[idx:])
+	_a := i1[0:idx]
+	_b := i1[idx:]
+	_c := i2[0:idx]
+	_d := i2[idx:]
+	a, erra := strconv.Atoi(_a)
+	b, errb := strconv.Atoi(_b)	
+	c, errc := strconv.Atoi(_c)	
+	d, errd := strconv.Atoi(_d)	
 	if (erra != nil || errb != nil || errc != nil || errd != nil) {
 		fmt.Println("Error converting component(s) to integer values")
+		return 0
 	}
 	fmt.Println(fmt.Sprintf("index of %d! Found components: {a: %d b: %d c: %d d: %d}", idx, a, b, c, d)) // Debug
-
+	
 	// Perform multiplications
-	var ac = a*c
-	var bd = b*d
+	var ac = karatsuba(_a, _c)
+	var bd = karatsuba(_b, _d)
 	// Find inner term
-	var inner = (a+b)*(c+d) - ac - bd 
-	fmt.Println(fmt.Sprintf("Found ac: %d and bd: %d\nFound inner term: %d ", ac, bd, inner)) // Debug
+	a_b := strconv.Itoa(a+b)
+	c_d := strconv.Itoa(c+d)
+	fmt.Println("a+b:", a+b) // Debug
+	fmt.Println("c+d:", c+d) // Debug
+	var inner = (karatsuba(a_b, c_d) - ac - bd) 
 	// Find output
 	output := (int(math.Pow(10, float64(width))) * ac) + (inner * int(math.Pow(10,float64(width/2)))) + (bd)
-	fmt.Println("Output: ", output)
-	// 200538
+	fmt.Println("Output recursive: ", output) // Debug
+	return output
 }
