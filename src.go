@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 //	"math/big"
 )
 
@@ -22,13 +23,26 @@ func main() {
 
 // TODO: This works but encounters int overflow with operands longer than 10 digits (base 10)
 // Maybe try to make it work using big int?
-func karatsuba(i1 string, i2 string) int {
+func karatsuba(_i1 string, _i2 string) int {
 	// Parse input
+	i1 := strings.TrimLeft(_i1, "0")
+	i2 := strings.TrimLeft(_i2, "0")
 	len_i1 := len(i1)
 	len_i2 := len(i2)
 	width := max(len_i1, len_i2)
 	fmt.Println("width of %d found!", width) // Debug
 	
+	fmt.Println(fmt.Sprintf("Performing multiplication on %s and %s", i1, i2))
+	if (width < 2) { // Base Case
+		_i1, err1 := strconv.Atoi(i1)
+		_i2, err2 := strconv.Atoi(i2)
+		if (err1 != nil || err2 != nil) {
+			fmt.Println("Error converting component(s) to integer values")
+			return 0
+		}
+		return _i1 * _i2
+	}
+
 	if (width % 2 != 0) {
 		fmt.Println("Non-even input length!") // Debug
 		width += 1
@@ -40,18 +54,8 @@ func karatsuba(i1 string, i2 string) int {
 		fmt.Println("Mismatched inputs!") // Debug
 		i1 = fmt.Sprintf("%0*s", width, i1)
 		i2 = fmt.Sprintf("%0*s", width, i2)
-	}
-	fmt.Println(fmt.Sprintf("Performing multiplication on %s and %s", i1, i2))
-	if (width < 3) { // Base Case
-		_i1, err1 := strconv.Atoi(i1)
-		_i2, err2 := strconv.Atoi(i2)
-		if (err1 != nil || err2 != nil) {
-			fmt.Println("Error converting component(s) to integer values")
-			return 0
-		}
-		return _i1 * _i2
-	}
 
+	}
 	// Define components
 	idx := width/2
 	_a := i1[0:idx]
@@ -72,6 +76,14 @@ func karatsuba(i1 string, i2 string) int {
 	var ac = karatsuba(_a, _c)
 	var bd = karatsuba(_b, _d)
 	// Find inner term
+//	n := new(big.Int)
+//    	n, ok := n.SetString("314159265358979323846264338327950288419716939937510582097494459", 10)
+//    	if !ok {
+//        	fmt.Println("SetString: error")
+//        	os.Exit(-1)
+//    	}
+//	fmt.Println("test: ", n)
+
 	a_b := strconv.Itoa(a+b)
 	c_d := strconv.Itoa(c+d)
 	fmt.Println("a+b:", a+b) // Debug
