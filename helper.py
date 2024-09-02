@@ -22,7 +22,16 @@ def fix_lengths(x,y):
         y = y.zfill(next_power_of_2(length))
     return x,y
 
-# Format data for karatsuba function
+# used by v2 to pad numbers while in recursive loop
+def recursive_length_format(x,y):
+    length = max(len(x), len(y))
+    if (len(x) != len(y) or length != next_power_of_2(length)):
+        x = x.zfill(next_power_of_2(length))
+        y = y.zfill(next_power_of_2(length))
+    return x,y
+
+
+# used by v1 to format data for karatsuba function before calling karatsuba
 def precondition(x,y):
     max_len = max(len(x), len(y))
     new_length = next_power_of_2(max_len)

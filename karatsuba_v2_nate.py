@@ -1,14 +1,14 @@
-# KARATSUBA MULTIPLICATION
+# KARATSUBA MULTIPLICATION V2
 # Nathan Hanzel
-# Note on implementation: I am preconditioning both inputs (x and y) to be the same length
-# and to be a power of 2. This is done outside of the actual karatsuba function to keep it clean :)
+# Note on implementation: For this version I am padding the numbers as they are iterated over in the recursive function
+# to see which approach is faster.
 # Also, all numbers are treated as strings until very end to make left padding easier
 
 import time
 from helper import *
 
 def karatsuba(x, y):
-    x,y = fix_lengths(x,y)
+    x,y = recursive_length_format(x,y)
     print("x: " + x + " y: " + y)
     n = len(x)
     if (n == 1): # 1 digit is our base case (a, b, c, and d will always have the same number of digits)
@@ -25,12 +25,15 @@ x = input("Enter first number: ")
 y = input("Enter second number: ")
 
 start_time = time.perf_counter()
-
 # Preconditioning data
-x,y = precondition(x,y)
+max_len = max(len(x), len(y))
+
+x = x.zfill(max_len)
+y = y.zfill(max_len)
+
 print("x: " + x)
 print("y: " + y)
 
 result = karatsuba(x,y)
 end_time = time.perf_counter()
-print("V1 Result: " + result + " Time: " + str(end_time - start_time))
+print("V2 Result: " + result + " Time: " + str(end_time - start_time))
