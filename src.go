@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-//	"math/big"
+	"math/big"
 )
 
 func main() {
@@ -65,8 +65,18 @@ func karatsuba(_i1 string, _i2 string) int {
 	a, erra := strconv.Atoi(_a)
 	b, errb := strconv.Atoi(_b)	
 	c, errc := strconv.Atoi(_c)	
-	d, errd := strconv.Atoi(_d)	
-	if (erra != nil || errb != nil || errc != nil || errd != nil) {
+	d, errd := strconv.Atoi(_d)
+	
+	biga := new(big.Int)
+	bigb := new(big.Int)
+	bigc := new(big.Int)
+	bigd := new(big.Int)
+	biga, aok:= biga.SetString(_a, 10)
+	bigb, bok:= bigb.SetString(_b, 10)
+	bigc, cok:= bigc.SetString(_c, 10)
+	bigd, dok:= bigd.SetString(_d, 10)
+	if (erra != nil || errb != nil || errc != nil || errd != nil ||
+	!aok || !bok || !cok || !dok) {
 		fmt.Println("Error converting component(s) to integer values")
 		return 0
 	}
@@ -76,21 +86,29 @@ func karatsuba(_i1 string, _i2 string) int {
 	var ac = karatsuba(_a, _c)
 	var bd = karatsuba(_b, _d)
 	// Find inner term
-//	n := new(big.Int)
-//    	n, ok := n.SetString("314159265358979323846264338327950288419716939937510582097494459", 10)
-//    	if !ok {
-//        	fmt.Println("SetString: error")
-//        	os.Exit(-1)
-//    	}
 //	fmt.Println("test: ", n)
-
-	a_b := strconv.Itoa(a+b)
-	c_d := strconv.Itoa(c+d)
-	fmt.Println("a+b:", a+b) // Debug
-	fmt.Println("c+d:", c+d) // Debug
-	var inner = (karatsuba(a_b, c_d) - ac - bd) 
+//	a_b := strconv.Itoa(a+b)
+//	c_d := strconv.Itoa(c+d)
+	a_b := new(big.Int)
+	c_d := new(big.Int)
+	
+	a_b.Add(biga, bigb)
+	c_d.Add(bigc, bigd)
+//	fmt.Println("a+b:", a_b) // Debug
+//	fmt.Println("c+d:", c_d) // Debug
+	var inner = (karatsuba(a_b.String(), c_d.String()) - ac - bd) 
+	ac_bd := new(big.Int).Add( big.NewInt(int64(ac)), big.NewInt(int64(bd))) // This is just ac + bd
+//	fmt.Println("ac+bd: ", ac_bd) // Debug
+	inner2 := new(big.Int).Sub(big.NewInt(int64(karatsuba(a_b.String(), c_d.String()))), ac_bd) // This is just (a + b) * (c + d) - ac - bd
+	fmt.Println("inner using bigint: ", inner2) // Debug
+	fmt.Println("inner using int: ", inner) // Debug
 	// Find output
 	output := (int(math.Pow(10, float64(width))) * ac) + (inner * int(math.Pow(10,float64(width/2)))) + (bd)
+	powerOfTen := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(width)), nil) // This is just 10^(width)
+	powerOfTen2 := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(width/2)), nil) // This is just 10^(width/2), needed for inner term
+	fmt.Println("Pwr of 10: ", powerOfTen) // Debug
+	output2 := new(big.Int).Add(new(big.Int).Mul(powerOfTen, big.NewInt(int64(ac))), new(big.Int).Add(new(big.Int).Mul(inner2, powerOfTen2), big.NewInt(int64(bd))))
 	fmt.Println("Output recursive: ", output) // Debug
+	fmt.Println("Output recursive using bigInt: ", output2) // Debug
 	return output
 }
